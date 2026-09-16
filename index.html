@@ -1,0 +1,1166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MOIZ AHMAD | Creative Web Developer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* =========================================
+           1. CSS VARIABLES & RESET
+           ========================================= */
+        :root {
+            --bg-deep: #050505;
+            --bg-card: #0a0a0a;
+            --crimson: #dc143c;
+            --burgundy: #800020;
+            --bright-red: #ff003c;
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0a0;
+            --glass: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 0, 60, 0.15);
+            --glow: 0 0 20px rgba(220, 20, 60, 0.4);
+            --font-heading: 'Space Grotesk', sans-serif;
+            --font-body: 'Inter', sans-serif;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; cursor: none; }
+        
+        html { scroll-behavior: smooth; }
+        
+        body {
+            background-color: var(--bg-deep);
+            color: var(--text-primary);
+            font-family: var(--font-body);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        /* Grain Overlay */
+        .grain {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 9998;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
+        }
+
+        /* =========================================
+           2. CUSTOM CURSOR
+           ========================================= */
+        .cursor-dot, .cursor-outline {
+            position: fixed; top: 0; left: 0; transform: translate(-50%, -50%);
+            border-radius: 50%; z-index: 9999; pointer-events: none;
+        }
+        .cursor-dot { width: 8px; height: 8px; background: var(--bright-red); }
+        .cursor-outline {
+            width: 40px; height: 40px; border: 1px solid var(--crimson);
+            transition: width 0.2s, height 0.2s, background 0.2s;
+        }
+        .cursor-outline.hovered {
+            width: 60px; height: 60px; background: rgba(220, 20, 60, 0.1);
+            border-color: var(--bright-red);
+        }
+
+        /* =========================================
+           3. LOADER
+           ========================================= */
+        #loader {
+            position: fixed; inset: 0; background: var(--bg-deep);
+            z-index: 10000; display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            transition: opacity 0.8s ease, visibility 0.8s;
+        }
+        .loader-text {
+            font-family: var(--font-heading); font-size: 1.5rem;
+            letter-spacing: 4px; color: var(--crimson);
+            animation: pulse 1.5s infinite;
+        }
+        .loader-bar {
+            width: 200px; height: 2px; background: #222; margin-top: 20px;
+            position: relative; overflow: hidden;
+        }
+        .loader-bar::after {
+            content: ''; position: absolute; left: -100%; width: 100%; height: 100%;
+            background: var(--bright-red); animation: load 1.5s ease-in-out infinite;
+        }
+
+        /* =========================================
+           4. UTILITIES & ANIMATIONS
+           ========================================= */
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+        .section { padding: 100px 0; position: relative; }
+        .section-title {
+            font-family: var(--font-heading); font-size: 2.5rem;
+            margin-bottom: 3rem; text-align: center;
+            background: linear-gradient(90deg, #fff, var(--crimson));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .glass-card {
+            background: var(--glass); backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border); border-radius: 16px;
+            padding: 2rem; transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .glass-card:hover { box-shadow: var(--glow); border-color: var(--crimson); }
+        
+        .btn {
+            display: inline-block; padding: 12px 28px; background: transparent;
+            color: var(--text-primary); border: 1px solid var(--crimson);
+            border-radius: 4px; font-family: var(--font-heading); font-weight: 500;
+            text-decoration: none; position: relative; overflow: hidden;
+            transition: 0.3s; z-index: 1;
+        }
+        .btn::before {
+            content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
+            background: var(--crimson); transition: 0.4s; z-index: -1;
+        }
+        .btn:hover::before { left: 0; }
+        .btn-primary { background: var(--crimson); border-color: var(--crimson); }
+        .btn-primary:hover { background: var(--bright-red); box-shadow: var(--glow); }
+
+        .reveal { opacity: 0; transform: translateY(30px); transition: 0.8s cubic-bezier(0.5, 0, 0, 1); }
+        .reveal.visible { opacity: 1; transform: translateY(0); }
+
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        @keyframes load { 0% { left: -100%; } 100% { left: 100%; } }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
+
+        /* =========================================
+           5. HEADER & NAV
+           ========================================= */
+        header {
+            position: fixed; top: 0; width: 100%; z-index: 100;
+            background: rgba(5, 5, 5, 0.8); backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--glass-border); padding: 15px 0;
+        }
+        nav { display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-family: var(--font-heading); font-size: 1.5rem; font-weight: 700; color: var(--text-primary); }
+        .logo span { color: var(--crimson); }
+        .nav-links { display: flex; gap: 30px; list-style: none; }
+        .nav-links a { color: var(--text-secondary); text-decoration: none; font-size: 0.9rem; transition: 0.3s; }
+        .nav-links a:hover { color: var(--bright-red); }
+
+        /* =========================================
+           6. HERO & EXPERTISE CLOUD
+           ========================================= */
+        .hero {
+            min-height: 100vh; display: flex; align-items: center;
+            position: relative; overflow: hidden; padding-top: 80px;
+        }
+        .hero-content { flex: 1; z-index: 2; }
+        .hero-status {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: rgba(220, 20, 60, 0.1); border: 1px solid var(--crimson);
+            padding: 6px 16px; border-radius: 20px; font-size: 0.8rem;
+            color: var(--bright-red); margin-bottom: 20px;
+        }
+        .hero-status::before {
+            content: ''; width: 8px; height: 8px; background: var(--bright-red);
+            border-radius: 50%; animation: pulse 1.5s infinite;
+        }
+        .hero h1 {
+            font-family: var(--font-heading); font-size: 4rem; line-height: 1.1;
+            margin-bottom: 20px;
+        }
+        .hero h1 span { color: var(--crimson); }
+        .hero p { color: var(--text-secondary); font-size: 1.1rem; max-width: 500px; margin-bottom: 30px; }
+        .hero-buttons { display: flex; gap: 15px; }
+
+        .expertise-cloud {
+            flex: 1; position: relative; height: 500px;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .cloud-item {
+            position: absolute; width: 70px; height: 70px;
+            background: var(--glass); border: 1px solid var(--glass-border);
+            border-radius: 16px; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; gap: 5px;
+            font-size: 1.5rem; transition: 0.3s; animation: float 6s ease-in-out infinite;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .cloud-item span { font-size: 0.6rem; color: var(--text-secondary); font-family: var(--font-heading); }
+        .cloud-item:hover { border-color: var(--bright-red); box-shadow: var(--glow); transform: scale(1.1); }
+        .cloud-item:nth-child(1) { top: 10%; left: 20%; animation-delay: 0s; }
+        .cloud-item:nth-child(2) { top: 20%; right: 20%; animation-delay: 1s; }
+        .cloud-item:nth-child(3) { top: 50%; left: 10%; animation-delay: 2s; }
+        .cloud-item:nth-child(4) { top: 50%; right: 10%; animation-delay: 0.5s; }
+        .cloud-item:nth-child(5) { bottom: 20%; left: 25%; animation-delay: 1.5s; }
+        .cloud-item:nth-child(6) { bottom: 20%; right: 25%; animation-delay: 2.5s; }
+        .cloud-item:nth-child(7) { bottom: 5%; left: 45%; animation-delay: 3s; }
+        .cloud-item:nth-child(8) { top: 5%; left: 45%; animation-delay: 3.5s; }
+
+        /* =========================================
+           7. SECTIONS (About, Services, Projects)
+           ========================================= */
+        .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; }
+        .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 30px; }
+        
+        .project-card img { width: 100%; height: 200px; object-fit: cover; border-radius: 8px; margin-bottom: 15px; }
+        .project-card h3 { font-family: var(--font-heading); margin-bottom: 10px; }
+        .project-card p { color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 15px; }
+        .tags { display: flex; gap: 8px; flex-wrap: wrap; }
+        .tag { font-size: 0.75rem; padding: 4px 10px; background: rgba(220, 20, 60, 0.1); color: var(--crimson); border-radius: 4px; }
+
+        /* =========================================
+           8. LABS (Python/C, React, Playground)
+           ========================================= */
+        .lab-container { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; height: 500px; }
+        .lab-editor { display: flex; flex-direction: column; height: 100%; }
+        .lab-tabs { display: flex; gap: 10px; margin-bottom: 10px; overflow-x: auto; padding-bottom: 5px; }
+        .lab-tab {
+            padding: 8px 16px; background: var(--glass); border: 1px solid var(--glass-border);
+            color: var(--text-secondary); border-radius: 4px; font-size: 0.85rem;
+            white-space: nowrap; transition: 0.3s;
+        }
+        .lab-tab.active, .lab-tab:hover { background: var(--crimson); color: white; border-color: var(--crimson); }
+        
+        .code-area {
+            flex: 1; background: #0d0d0d; border: 1px solid var(--glass-border);
+            border-radius: 8px; padding: 15px; color: #d4d4d4; font-family: 'Fira Code', monospace;
+            font-size: 0.85rem; resize: none; outline: none; line-height: 1.5;
+        }
+        .terminal {
+            flex: 1; background: #000; border: 1px solid #333; border-radius: 8px;
+            padding: 15px; font-family: 'Fira Code', monospace; font-size: 0.85rem;
+            color: #0f0; overflow-y: auto; position: relative;
+        }
+        .terminal-header {
+            position: absolute; top: 0; left: 0; right: 0; height: 30px;
+            background: #1a1a1a; border-bottom: 1px solid #333;
+            display: flex; align-items: center; padding: 0 10px; gap: 6px;
+        }
+        .terminal-dot { width: 10px; height: 10px; border-radius: 50%; }
+        .terminal-content { margin-top: 30px; white-space: pre-wrap; }
+        
+        .lab-controls { display: flex; gap: 10px; margin-top: 10px; }
+        .lab-btn {
+            padding: 8px 16px; background: var(--glass); border: 1px solid var(--glass-border);
+            color: white; border-radius: 4px; font-size: 0.8rem; transition: 0.3s;
+        }
+        .lab-btn:hover { background: var(--crimson); border-color: var(--crimson); }
+
+        .playground-preview {
+            width: 100%; height: 100%; border: none; border-radius: 8px;
+            background: white;
+        }
+
+        /* =========================================
+           9. JOURNEY & EDUCATION
+           ========================================= */
+        .tabs { display: flex; gap: 20px; margin-bottom: 30px; border-bottom: 1px solid var(--glass-border); }
+        .tab-btn {
+            padding: 10px 20px; background: none; border: none; color: var(--text-secondary);
+            font-family: var(--font-heading); font-size: 1.1rem; cursor: pointer;
+            position: relative; transition: 0.3s;
+        }
+        .tab-btn.active { color: var(--bright-red); }
+        .tab-btn.active::after {
+            content: ''; position: absolute; bottom: -1px; left: 0; width: 100%; height: 2px; background: var(--crimson);
+        }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fadeIn 0.5s; }
+        
+        .timeline-item {
+            padding-left: 30px; border-left: 2px solid var(--crimson);
+            margin-bottom: 30px; position: relative;
+        }
+        .timeline-item::before {
+            content: ''; position: absolute; left: -6px; top: 5px;
+            width: 10px; height: 10px; background: var(--bright-red); border-radius: 50%;
+        }
+        .timeline-item h4 { font-family: var(--font-heading); font-size: 1.2rem; margin-bottom: 5px; }
+        .timeline-item .year { color: var(--crimson); font-size: 0.9rem; margin-bottom: 10px; display: block; }
+        .timeline-item p { color: var(--text-secondary); }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* =========================================
+           10. PACKAGES & CART
+           ========================================= */
+        .package-card {
+            text-align: center; position: relative; overflow: hidden;
+            display: flex; flex-direction: column; height: 100%;
+        }
+        .package-card.featured { border-color: var(--crimson); box-shadow: var(--glow); }
+        .package-card h3 { font-family: var(--font-heading); font-size: 1.5rem; margin-bottom: 10px; }
+        .price { font-size: 2.5rem; font-weight: 700; color: var(--bright-red); margin-bottom: 20px; }
+        .price span { font-size: 1rem; color: var(--text-secondary); font-weight: 400; }
+        .features { list-style: none; margin-bottom: 30px; flex: 1; text-align: left; }
+        .features li { padding: 8px 0; border-bottom: 1px solid var(--glass-border); color: var(--text-secondary); font-size: 0.9rem; }
+        .features li::before { content: '✓'; color: var(--crimson); margin-right: 10px; }
+
+        .cart-drawer {
+            position: fixed; top: 0; right: -400px; width: 380px; height: 100vh;
+            background: #0f0f0f; border-left: 1px solid var(--glass-border);
+            z-index: 1000; padding: 30px; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex; flex-direction: column;
+        }
+        .cart-drawer.open { right: 0; box-shadow: -10px 0 30px rgba(0,0,0,0.8); }
+        .cart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .cart-items { flex: 1; overflow-y: auto; }
+        .cart-item { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid var(--glass-border); }
+        .cart-item-info h4 { font-size: 1rem; margin-bottom: 4px; }
+        .cart-item-info p { color: var(--crimson); font-size: 0.9rem; }
+        .remove-btn { color: var(--text-secondary); background: none; border: none; font-size: 1.2rem; transition: 0.3s; }
+        .remove-btn:hover { color: var(--bright-red); }
+        .cart-footer { margin-top: 20px; border-top: 1px solid var(--glass-border); padding-top: 20px; }
+        .cart-total { display: flex; justify-content: space-between; font-size: 1.2rem; font-weight: 600; margin-bottom: 20px; }
+        .cart-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px);
+            z-index: 999; opacity: 0; visibility: hidden; transition: 0.3s;
+        }
+        .cart-overlay.open { opacity: 1; visibility: visible; }
+
+        /* =========================================
+           11. CONTACT & FOOTER
+           ========================================= */
+        .contact-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 30px; margin-bottom: 50px; }
+        .contact-item { text-align: center; padding: 30px; }
+        .contact-item i { font-size: 2rem; color: var(--crimson); margin-bottom: 15px; }
+        .contact-item h4 { margin-bottom: 10px; font-family: var(--font-heading); }
+        .contact-item a { color: var(--text-secondary); text-decoration: none; transition: 0.3s; }
+        .contact-item a:hover { color: var(--bright-red); }
+
+        footer {
+            text-align: center; padding: 40px 0; border-top: 1px solid var(--glass-border);
+            color: var(--text-secondary); font-size: 0.9rem;
+        }
+
+        /* =========================================
+           12. RESPONSIVE
+           ========================================= */
+        @media (max-width: 768px) {
+            .hero { flex-direction: column; text-align: center; padding-top: 120px; }
+            .hero h1 { font-size: 2.5rem; }
+            .hero-buttons { justify-content: center; }
+            .expertise-cloud { display: none; }
+            .lab-container { grid-template-columns: 1fr; height: auto; }
+            .lab-editor { height: 400px; }
+            .nav-links { display: none; }
+            .cart-drawer { width: 100%; right: -100%; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Grain Overlay -->
+    <div class="grain"></div>
+
+    <!-- Custom Cursor -->
+    <div class="cursor-dot"></div>
+    <div class="cursor-outline"></div>
+
+    <!-- Loader -->
+    <div id="loader">
+        <div class="loader-text">INITIALIZING MOIZ AHMAD</div>
+        <div class="loader-bar"></div>
+    </div>
+
+    <!-- Cart Overlay & Drawer -->
+    <div class="cart-overlay" onclick="toggleCart()"></div>
+    <div class="cart-drawer" id="cartDrawer">
+        <div class="cart-header">
+            <h3>Your Cart</h3>
+            <button class="remove-btn" onclick="toggleCart()"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="cart-items" id="cartItems"></div>
+        <div class="cart-footer">
+            <div class="cart-total">
+                <span>Total:</span>
+                <span id="cartTotal">$0</span>
+            </div>
+            <button class="btn btn-primary" style="width: 100%;" onclick="checkoutWhatsApp()">
+                <i class="fa-brands fa-whatsapp"></i> ORDER VIA WHATSAPP
+            </button>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <nav>
+                <div class="logo">MOIZ<span>.</span></div>
+                <ul class="nav-links">
+                    <li><a href="#about">About</a></li>
+                    <li><a href="#projects">Projects</a></li>
+                    <li><a href="#labs">Labs</a></li>
+                    <li><a href="#journey">Journey</a></li>
+                    <li><a href="#packages">Packages</a></li>
+                    <li><a href="#contact">Contact</a></li>
+                </ul>
+                <button class="btn btn-primary magnetic" onclick="toggleCart()">
+                    <i class="fa-solid fa-cart-shopping"></i> <span id="cartCount">0</span>
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero -->
+    <section class="hero container">
+        <div class="hero-content reveal">
+            <div class="hero-status" id="heroStatus">AVAILABLE FOR NEW PROJECTS</div>
+            <h1 id="heroName">MOIZ AHMAD<br><span>CREATIVE WEB DEVELOPER</span></h1>
+            <p id="heroDesc">Crafting premium, high-performance digital experiences with cutting-edge technologies and cinematic design.</p>
+            <div class="hero-buttons">
+                <a href="#projects" class="btn btn-primary magnetic">VIEW PROJECTS</a>
+                <a href="#contact" class="btn magnetic">START A PROJECT</a>
+            </div>
+        </div>
+        <div class="expertise-cloud" id="expertiseCloud">
+            <!-- Populated by JS -->
+        </div>
+    </section>
+
+    <!-- About -->
+    <section id="about" class="section container">
+        <h2 class="section-title reveal">About Me</h2>
+        <div class="glass-card reveal" style="text-align: center; max-width: 800px; margin: 0 auto;">
+            <p style="font-size: 1.1rem; color: var(--text-secondary);">
+                I am a passionate developer specializing in building exceptional digital experiences. 
+                From sleek frontend interfaces to robust backend systems, I bridge the gap between 
+                design and technology. My mission is to deliver pixel-perfect, high-performance 
+                solutions that drive real business value.
+            </p>
+        </div>
+    </section>
+
+    <!-- Expertise -->
+    <section class="section container">
+        <h2 class="section-title reveal">Technical Expertise</h2>
+        <div class="grid-3" id="expertiseGrid">
+            <!-- Populated by JS -->
+        </div>
+    </section>
+
+    <!-- Services -->
+    <section class="section container">
+        <h2 class="section-title reveal">Services</h2>
+        <div class="grid-3">
+            <div class="glass-card tilt-card reveal">
+                <i class="fa-solid fa-code" style="font-size: 2rem; color: var(--crimson); margin-bottom: 20px;"></i>
+                <h3>Web Development</h3>
+                <p style="color: var(--text-secondary);">Custom, responsive websites built with modern frameworks and clean code architecture.</p>
+            </div>
+            <div class="glass-card tilt-card reveal">
+                <i class="fa-brands fa-wordpress" style="font-size: 2rem; color: var(--crimson); margin-bottom: 20px;"></i>
+                <h3>WordPress & WooCommerce</h3>
+                <p style="color: var(--text-secondary);">Full-scale e-commerce solutions, custom themes, and plugin development.</p>
+            </div>
+            <div class="glass-card tilt-card reveal">
+                <i class="fa-solid fa-mobile-screen" style="font-size: 2rem; color: var(--crimson); margin-bottom: 20px;"></i>
+                <h3>UI/UX Design</h3>
+                <p style="color: var(--text-secondary);">User-centric design with a focus on aesthetics, accessibility, and conversion.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Featured Projects -->
+    <section id="projects" class="section container">
+        <h2 class="section-title reveal">Featured Projects</h2>
+        <div class="grid-3" id="featuredProjectsGrid">
+            <!-- Populated by JS -->
+        </div>
+    </section>
+
+    <!-- Python + C Lab -->
+    <section id="labs" class="section container">
+        <h2 class="section-title reveal">Python + C Code Lab</h2>
+        <div class="tabs reveal">
+            <button class="tab-btn active" onclick="switchLabTab('python')">Python (6)</button>
+            <button class="tab-btn" onclick="switchLabTab('c')">C Programming (5)</button>
+        </div>
+        
+        <div id="pythonLab" class="tab-content active">
+            <div class="lab-tabs" id="pythonTabs"></div>
+            <div class="lab-container">
+                <div class="lab-editor">
+                    <textarea class="code-area" id="pythonCode" readonly></textarea>
+                    <div class="lab-controls">
+                        <button class="lab-btn" onclick="runSimulation('python')"><i class="fa-solid fa-play"></i> Run</button>
+                        <button class="lab-btn" onclick="copyCode('python')"><i class="fa-regular fa-copy"></i> Copy</button>
+                    </div>
+                </div>
+                <div class="terminal" id="pythonTerminal">
+                    <div class="terminal-header">
+                        <div class="terminal-dot" style="background: #ff5f56;"></div>
+                        <div class="terminal-dot" style="background: #ffbd2e;"></div>
+                        <div class="terminal-dot" style="background: #27c93f;"></div>
+                        <span style="margin-left: 10px; color: #666; font-size: 0.8rem;">bash — python3</span>
+                    </div>
+                    <div class="terminal-content" id="pythonOutput">Ready to execute...</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="cLab" class="tab-content">
+            <div class="lab-tabs" id="cTabs"></div>
+            <div class="lab-container">
+                <div class="lab-editor">
+                    <textarea class="code-area" id="cCode" readonly></textarea>
+                    <div class="lab-controls">
+                        <button class="lab-btn" onclick="runSimulation('c')"><i class="fa-solid fa-play"></i> Run</button>
+                        <button class="lab-btn" onclick="copyCode('c')"><i class="fa-regular fa-copy"></i> Copy</button>
+                    </div>
+                </div>
+                <div class="terminal" id="cTerminal">
+                    <div class="terminal-header">
+                        <div class="terminal-dot" style="background: #ff5f56;"></div>
+                        <div class="terminal-dot" style="background: #ffbd2e;"></div>
+                        <div class="terminal-dot" style="background: #27c93f;"></div>
+                        <span style="margin-left: 10px; color: #666; font-size: 0.8rem;">bash — gcc</span>
+                    </div>
+                    <div class="terminal-content" id="cOutput">Ready to compile...</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- React Lab -->
+    <section class="section container">
+        <h2 class="section-title reveal">React Lab</h2>
+        <div class="lab-tabs" id="reactTabs" style="margin-bottom: 20px;"></div>
+        <div class="lab-container" style="height: 400px;">
+            <div class="lab-editor">
+                <div style="margin-bottom: 10px; font-size: 0.8rem; color: var(--crimson);">React Component Code</div>
+                <textarea class="code-area" id="reactCode" readonly></textarea>
+                <div class="lab-controls">
+                    <button class="lab-btn" onclick="copyCode('react')"><i class="fa-regular fa-copy"></i> Copy Code</button>
+                </div>
+            </div>
+            <div class="glass-card" style="display: flex; flex-direction: column; padding: 0; overflow: hidden;">
+                <div style="padding: 15px; background: rgba(255,255,255,0.05); border-bottom: 1px solid var(--glass-border); font-size: 0.8rem; color: var(--text-secondary);">
+                    Interactive Preview (Vanilla JS Equivalent)
+                </div>
+                <div id="reactPreview" style="flex: 1; padding: 20px; display: flex; align-items: center; justify-content: center; background: #0a0a0a;">
+                    <!-- Dynamic Preview -->
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Frontend Playground -->
+    <section class="section container">
+        <h2 class="section-title reveal">Frontend Playground</h2>
+        <div class="lab-tabs" id="playgroundTabs" style="margin-bottom: 20px;"></div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; height: 500px;" class="lab-container">
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+                <textarea class="code-area" id="pgHtml" placeholder="HTML" style="flex: 1; font-size: 0.8rem;"></textarea>
+                <textarea class="code-area" id="pgCss" placeholder="CSS" style="flex: 1; font-size: 0.8rem;"></textarea>
+                <textarea class="code-area" id="pgJs" placeholder="JavaScript" style="flex: 1; font-size: 0.8rem;"></textarea>
+                <div class="lab-controls">
+                    <button class="lab-btn" onclick="runPlayground()"><i class="fa-solid fa-play"></i> Run</button>
+                    <button class="lab-btn" onclick="resetPlayground()"><i class="fa-solid fa-rotate-right"></i> Reset</button>
+                    <button class="lab-btn" onclick="copyPlayground()"><i class="fa-regular fa-copy"></i> Copy All</button>
+                    <label style="display: flex; align-items: center; gap: 5px; color: var(--text-secondary); font-size: 0.8rem; margin-left: auto;">
+                        <input type="checkbox" id="autoRun" checked onchange="savePlaygroundState()"> Auto Run
+                    </label>
+                </div>
+            </div>
+            <div style="background: white; border-radius: 8px; overflow: hidden; position: relative;">
+                <iframe id="playgroundFrame" class="playground-preview" sandbox="allow-scripts allow-modals"></iframe>
+            </div>
+        </div>
+    </section>
+
+    <!-- Journey & Education -->
+    <section id="journey" class="section container">
+        <h2 class="section-title reveal">Journey & Education</h2>
+        <div class="tabs reveal">
+            <button class="tab-btn active" onclick="switchJourneyTab('education')">Education</button>
+            <button class="tab-btn" onclick="switchJourneyTab('freelance')">Freelance Journey</button>
+        </div>
+        
+        <div id="educationTab" class="tab-content active">
+            <div class="grid-3" id="educationGrid"></div>
+        </div>
+        
+        <div id="freelanceTab" class="tab-content">
+            <div class="timeline" id="freelanceTimeline"></div>
+        </div>
+    </section>
+
+    <!-- Packages -->
+    <section id="packages" class="section container">
+        <h2 class="section-title reveal">Investment Packages</h2>
+        <div class="grid-3" id="packagesGrid"></div>
+    </section>
+
+    <!-- Contact -->
+    <section id="contact" class="section container">
+        <h2 class="section-title reveal">Get In Touch</h2>
+        <div class="contact-grid reveal" id="contactGrid"></div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <p>&copy; 2026 Moiz Ahmad. All Rights Reserved. Crafted with precision.</p>
+        </div>
+    </footer>
+
+    <!-- =========================================
+         JAVASCRIPT CONFIGURATION & LOGIC
+         ========================================= -->
+    <script>
+        /* =========================================
+           1. EDITABLE CONFIGURATION OBJECT
+           ========================================= */
+        const CONFIG = {
+            personal: {
+                name: "MOIZ AHMAD",
+                title: "CREATIVE WEB DEVELOPER",
+                status: "AVAILABLE FOR NEW PROJECTS",
+                email: "semoizahmad@gmail.com",
+                whatsapp: "923253248839",
+                whatsappDisplay: "03253248839",
+                tiktok: "zenflaremoiz",
+                instagram: "zenflaremoiz",
+                fiverr: "gdmoizahmad"
+            },
+            expertise: [
+                { name: "HTML5", icon: "fa-brands fa-html5", color: "#e34c26" },
+                { name: "CSS3", icon: "fa-brands fa-css3-alt", color: "#264de4" },
+                { name: "JavaScript", icon: "fa-brands fa-js", color: "#f7df1e" },
+                { name: "React", icon: "fa-brands fa-react", color: "#61dafb" },
+                { name: "WordPress", icon: "fa-brands fa-wordpress", color: "#21759b" },
+                { name: "WooCommerce", icon: "fa-brands fa-woocommerce", color: "#96588a" },
+                { name: "Python", icon: "fa-brands fa-python", color: "#3776ab" },
+                { name: "C", icon: "fa-solid fa-code", color: "#a8b9cc" }
+            ],
+            featuredProjects: [
+                { title: "E-Commerce Platform", desc: "Full-stack WooCommerce solution with custom payment gateway integration.", img: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=600&q=80", tags: ["WordPress", "PHP", "CSS3"] },
+                { title: "SaaS Dashboard", desc: "Real-time analytics dashboard with interactive data visualization.", img: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&q=80", tags: ["React", "D3.js", "Node"] },
+                { title: "AI Portfolio Generator", desc: "Python-powered tool that generates portfolios from resumes automatically.", img: "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=600&q=80", tags: ["Python", "AI", "HTML5"] },
+                { title: "FinTech Mobile App", desc: "Cross-platform mobile application for secure expense tracking.", img: "https://images.unsplash.com/photo-1563986768609-322da13575f3?w=600&q=80", tags: ["React Native", "Firebase"] },
+                { title: "Corporate Identity", desc: "Complete brand overhaul and responsive web presence for a tech firm.", img: "https://images.unsplash.com/photo-1497366216548-37526070297c?w=600&q=80", tags: ["Design", "Web Dev"] },
+                { title: "Real Estate Portal", desc: "Advanced property listing platform with interactive map integration.", img: "https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=600&q=80", tags: ["JavaScript", "API", "CSS3"] }
+            ],
+            pythonProjects: [
+                { title: "Data Scraper", code: "import requests\nfrom bs4 import BeautifulSoup\n\nurl = 'https://example.com'\nresponse = requests.get(url)\nsoup = BeautifulSoup(response.text, 'html.parser')\nprint('Title:', soup.title.string)\nprint('Status: Success')", output: "Title: Example Domain\nStatus: Success" },
+                { title: "CLI Calculator", code: "def add(a, b): return a + b\n\ndef main():\n    print('Calculator Ready')\n    result = add(15, 27)\n    print(f'Result: {result}')\n\nif __name__ == '__main__':\n    main()", output: "Calculator Ready\nResult: 42" },
+                { title: "File Organizer", code: "import os\n\nfolder = './downloads'\nfor filename in os.listdir(folder):\n    if filename.endswith('.pdf'):\n        print(f'Moved: {filename} to /PDFs')\n\nprint('Organization Complete')", output: "Moved: report.pdf to /PDFs\nMoved: invoice.pdf to /PDFs\nOrganization Complete" },
+                { title: "Password Gen", code: "import random\nimport string\n\ndef gen_pwd(length=12):\n    chars = string.ascii_letters + string.digits + '!@#'\n    return ''.join(random.choice(chars) for _ in range(length))\n\nprint('New Password:', gen_pwd())", output: "New Password: aK9!mP2$xLq7" },
+                { title: "API Fetcher", code: "import urllib.request\nimport json\n\nurl = 'https://api.github.com'\nreq = urllib.request.urlopen(url)\ndata = json.loads(req.read())\nprint('API Status: Online')\nprint('Current User URL:', data.get('current_user_url'))", output: "API Status: Online\nCurrent User URL: https://api.github.com/user" },
+                { title: "Automation", code: "import time\n\nprint('Starting automation...')\ntime.sleep(1)\nprint('Task 1: Completed')\ntime.sleep(1)\nprint('Task 2: Completed')\nprint('All tasks finished successfully.')", output: "Starting automation...\nTask 1: Completed\nTask 2: Completed\nAll tasks finished successfully." }
+            ],
+            cProjects: [
+                { title: "Hello World", code: "#include <stdio.h>\n\nint main() {\n    printf(\"Hello, World!\\n\");\n    printf(\"Welcome to C Programming.\\n\");\n    return 0;\n}", output: "Hello, World!\nWelcome to C Programming." },
+                { title: "Array Sum", code: "#include <stdio.h>\n\nint main() {\n    int arr[] = {10, 20, 30, 40, 50};\n    int sum = 0;\n    for(int i=0; i<5; i++) {\n        sum += arr[i];\n    }\n    printf(\"Total Sum: %d\\n\", sum);\n    return 0;\n}", output: "Total Sum: 150" },
+                { title: "Palindrome", code: "#include <stdio.h>\n#include <string.h>\n\nint main() {\n    char str[] = \"madam\";\n    int l = 0, h = strlen(str) - 1;\n    int isPalin = 1;\n    while(h > l) {\n        if(str[l++] != str[h--]) { isPalin = 0; break; }\n    }\n    printf(\"'%s' is %s\\n\", str, isPalin ? \"Palindrome\" : \"Not Palindrome\");\n    return 0;\n}", output: "'madam' is Palindrome" },
+                { title: "File I/O", code: "#include <stdio.h>\n\nint main() {\n    FILE *fptr = fopen(\"test.txt\", \"w\");\n    if(fptr != NULL) {\n        fprintf(fptr, \"Data written successfully.\\n\");\n        fclose(fptr);\n        printf(\"File operation completed.\\n\");\n    }\n    return 0;\n}", output: "File operation completed." },
+                { title: "Struct Demo", code: "#include <stdio.h>\n\nstruct Student {\n    char name[20];\n    int age;\n};\n\nint main() {\n    struct Student s1 = {\"Moiz\", 22};\n    printf(\"Name: %s\\n\", s1.name);\n    printf(\"Age: %d\\n\", s1.age);\n    return 0;\n}", output: "Name: Moiz\nAge: 22" }
+            ],
+            reactProjects: [
+                { title: "Todo App", code: "function Todo() {\n  const [tasks, setTasks] = useState([]);\n  const add = () => setTasks([...tasks, 'New Task']);\n  return (\n    <div>\n      <button onClick={add}>Add</button>\n      <ul>{tasks.map((t,i) => <li key={i}>{t}</li>)}</ul>\n    </div>\n  );\n}", preview: "<div style='text-align:center;'><button onclick='this.nextElementSibling.innerHTML+=\"<li>New Task</li>\"' style='padding:8px 16px; margin-bottom:10px; cursor:pointer;'>Add Task</button><ul style='list-style:none; padding:0;'><li>Sample Task</li></ul></div>" },
+                { title: "Counter", code: "function Counter() {\n  const [count, setCount] = useState(0);\n  return (\n    <div>\n      <h2>{count}</h2>\n      <button onClick={() => setCount(count+1)}>+</button>\n      <button onClick={() => setCount(count-1)}>-</button>\n    </div>\n  );\n}", preview: "<div style='text-align:center;'><h1 id='rc' style='margin-bottom:15px;'>0</h1><button onclick='document.getElementById(\"rc\").innerText=parseInt(document.getElementById(\"rc\").innerText)+1' style='padding:8px 16px; margin:0 5px; cursor:pointer;'>+</button><button onclick='document.getElementById(\"rc\").innerText=parseInt(document.getElementById(\"rc\").innerText)-1' style='padding:8px 16px; margin:0 5px; cursor:pointer;'>-</button></div>" },
+                { title: "Notes", code: "function Notes() {\n  const [note, setNote] = useState('');\n  return (\n    <textarea \n      value={note} \n      onChange={(e) => setNote(e.target.value)}\n      placeholder=\"Type your note...\"\n    />\n  );\n}", preview: "<textarea placeholder='Type your note...' style='width:100%; height:150px; padding:10px; border-radius:4px; border:1px solid #333; background:#111; color:white;'></textarea>" },
+                { title: "Shopping Cart", code: "function Cart() {\n  const [items] = useState([{name: 'Laptop', price: 999}]);\n  const total = items.reduce((a, b) => a + b.price, 0);\n  return <div>Total: ${total}</div>;\n}", preview: "<div style='text-align:center; padding:20px; border:1px solid #333; border-radius:8px;'><p>Laptop - $999</p><h3 style='color:#dc143c; margin-top:10px;'>Total: $999</h3></div>" },
+                { title: "Weather UI", code: "function Weather() {\n  const [temp, setTemp] = useState(24);\n  return (\n    <div className=\"weather\">\n      <h1>{temp}°C</h1>\n      <button onClick={() => setTemp(temp+1)}>Simulate +1°</button>\n    </div>\n  );\n}", preview: "<div style='text-align:center;'><h1 id='wt' style='font-size:3rem; margin-bottom:10px;'>24°C</h1><button onclick='document.getElementById(\"wt\").innerText=(parseInt(document.getElementById(\"wt\").innerText)+1)+\"°C\"' style='padding:8px 16px; cursor:pointer;'>Simulate +1°</button></div>" },
+                { title: "Quiz", code: "function Quiz() {\n  const [score, setScore] = useState(0);\n  return (\n    <button onClick={() => setScore(score+1)}>\n      Correct! Score: {score}\n    </button>\n  );\n}", preview: "<div style='text-align:center;'><button onclick='this.innerText=\"Correct! Score: \"+(parseInt(this.innerText.split(\": \")[1])+1)' style='padding:12px 24px; background:#dc143c; color:white; border:none; border-radius:4px; cursor:pointer;'>Correct! Score: 0</button></div>" },
+                { title: "Expense Tracker", code: "function Expense() {\n  const [amount, setAmount] = useState(0);\n  return (\n    <div>\n      <input type=\"number\" onChange={e => setAmount(e.target.value)} />\n      <p>Logged: ${amount}</p>\n    </div>\n  );\n}", preview: "<div style='text-align:center;'><input type='number' id='ex' placeholder='Amount' oninput='document.getElementById(\"ex-res\").innerText=\"Logged: $\"+this.value' style='padding:8px; margin-bottom:10px;'><p id='ex-res'>Logged: $0</p></div>" },
+                { title: "Theme Switcher", code: "function Theme() {\n  const [dark, setDark] = useState(false);\n  return (\n    <button onClick={() => setDark(!dark)}>\n      {dark ? 'Light Mode' : 'Dark Mode'}\n    </button>\n  );\n}", preview: "<button onclick='document.getElementById(\"theme-preview\").classList.toggle(\"light\")' id='theme-preview' style='padding:12px 24px; background:#222; color:white; border:1px solid #444; border-radius:4px; cursor:pointer; transition:0.3s;'>Dark Mode</button><style>#theme-preview.light{background:#fff;color:#000;border-color:#ccc;}</style>" }
+            ],
+            playgroundProjects: [
+                { title: "Animated Button", html: "<button class='btn'>Hover Me</button>", css: ".btn { padding: 15px 30px; background: #dc143c; color: white; border: none; border-radius: 5px; cursor: pointer; transition: 0.3s; }\n.btn:hover { transform: scale(1.1); box-shadow: 0 0 15px #dc143c; }", js: "" },
+                { title: "Color Generator", html: "<h1 id='color'>#FFFFFF</h1><button onclick='changeColor()'>Generate</button>", css: "body { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; transition: 0.3s; font-family: sans-serif; }\nbutton { padding: 10px 20px; margin-top: 20px; cursor: pointer; background: #333; color: white; border: none; border-radius: 4px; }", js: "function changeColor() {\n  const hex = '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6, '0');\n  document.getElementById('color').innerText = hex;\n  document.body.style.backgroundColor = hex;\n  document.body.style.color = hex === '#000000' ? '#fff' : '#000';\n}" },
+                { title: "Counter", html: "<h1 id='count'>0</h1><button onclick='update(1)'>+</button><button onclick='update(-1)'>-</button>", css: "body { display: flex; flex-direction: column; align-items: center; margin-top: 20vh; font-family: sans-serif; }\nbutton { padding: 10px 20px; margin: 5px; font-size: 1.2rem; cursor: pointer; background: #dc143c; color: white; border: none; border-radius: 4px; }", js: "let c = 0;\nfunction update(val) {\n  c += val;\n  document.getElementById('count').innerText = c;\n}" },
+                { title: "Digital Clock", html: "<h1 id='clock'>00:00:00</h1>", css: "body { display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background: #111; color: #dc143c; font-family: monospace; font-size: 3rem; }", js: "setInterval(() => {\n  document.getElementById('clock').innerText = new Date().toLocaleTimeString();\n}, 1000);" },
+                { title: "Random Quote", html: "<p id='quote'>\"Click button\"</p><button onclick='getQuote()'>New Quote</button>", css: "body { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; font-family: serif; text-align: center; padding: 20px; }\nbutton { margin-top: 20px; padding: 10px 20px; cursor: pointer; background: #333; color: white; border: none; border-radius: 4px; }", js: "const quotes = [\"Be yourself.\", \"Code is poetry.\", \"Stay hungry.\", \"Never give up.\"];\nfunction getQuote() {\n  document.getElementById('quote').innerText = '\"' + quotes[Math.floor(Math.random()*quotes.length)] + '\"';\n}" },
+                { title: "Password Gen", html: "<input type='text' id='pwd' readonly><br><button onclick='gen()'>Generate</button>", css: "body { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; font-family: sans-serif; }\ninput { padding: 10px; font-size: 1.2rem; margin-bottom: 10px; text-align: center; border: 1px solid #ccc; border-radius: 4px; }\nbutton { padding: 10px 20px; cursor: pointer; background: #dc143c; color: white; border: none; border-radius: 4px; }", js: "function gen() {\n  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$';\n  let pwd = '';\n  for(let i=0; i<12; i++) pwd += chars.charAt(Math.floor(Math.random() * chars.length));\n  document.getElementById('pwd').value = pwd;\n}" },
+                { title: "Todo List", html: "<input id='task' placeholder='Task'><button onclick='add()'>Add</button><ul id='list'></ul>", css: "body { display: flex; flex-direction: column; align-items: center; margin-top: 20vh; font-family: sans-serif; }\ninput, button { padding: 10px; margin: 5px; border-radius: 4px; border: 1px solid #ccc; }\nbutton { background: #dc143c; color: white; border: none; cursor: pointer; }\nul { list-style: none; padding: 0; width: 300px; }\nli { background: #eee; margin: 5px 0; padding: 10px; display: flex; justify-content: space-between; border-radius: 4px; }", js: "function add() {\n  const val = document.getElementById('task').value;\n  if(!val) return;\n  const li = document.createElement('li');\n  li.innerHTML = val + ' <span onclick=\"this.parentElement.remove()\" style=\"cursor:pointer;color:red;font-weight:bold;\">X</span>';\n  document.getElementById('list').appendChild(li);\n  document.getElementById('task').value = '';\n}" },
+                { title: "BMI Calculator", html: "<input id='w' placeholder='Weight (kg)'><input id='h' placeholder='Height (m)'><button onclick='calc()'>Calc</button><p id='res'></p>", css: "body { display: flex; flex-direction: column; align-items: center; margin-top: 20vh; font-family: sans-serif; }\ninput, button { padding: 10px; margin: 5px; border-radius: 4px; border: 1px solid #ccc; }\nbutton { background: #dc143c; color: white; border: none; cursor: pointer; }", js: "function calc() {\n  const w = parseFloat(document.getElementById('w').value);\n  const h = parseFloat(document.getElementById('h').value);\n  if(w && h) {\n    const bmi = (w / (h*h)).toFixed(2);\n    document.getElementById('res').innerText = 'BMI: ' + bmi;\n  }\n}" },
+                { title: "Tip Calculator", html: "<input id='bill' placeholder='Bill Amount'><input id='tip' placeholder='Tip %'><button onclick='calc()'>Calc</button><p id='res'></p>", css: "body { display: flex; flex-direction: column; align-items: center; margin-top: 20vh; font-family: sans-serif; }\ninput, button { padding: 10px; margin: 5px; border-radius: 4px; border: 1px solid #ccc; }\nbutton { background: #dc143c; color: white; border: none; cursor: pointer; }", js: "function calc() {\n  const bill = parseFloat(document.getElementById('bill').value) || 0;\n  const tip = parseFloat(document.getElementById('tip').value) || 0;\n  const total = bill + (bill * tip / 100);\n  document.getElementById('res').innerText = 'Total: $' + total.toFixed(2);\n}" },
+                { title: "Theme Switcher", html: "<button onclick='toggle()'>Toggle Theme</button>", css: "body { display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; transition: 0.3s; background: #fff; color: #000; font-family: sans-serif; }\nbody.dark { background: #222; color: #fff; }\nbutton { padding: 15px 30px; font-size: 1.2rem; cursor: pointer; border: 2px solid #000; background: transparent; border-radius: 4px; }\nbody.dark button { border-color: #fff; }", js: "function toggle() {\n  document.body.classList.toggle('dark');\n}" }
+            ],
+            education: [
+                { degree: "Matriculation", institution: "DPS & College, Gogera Campus", year: "2018–2019" },
+                { degree: "FSc", institution: "Aspire Group Of Colleges", year: "2020–2021" },
+                { degree: "BS in BBIT", institution: "Virtual University of Pakistan", year: "2022–2026" }
+            ],
+            journey: [
+                { title: "Graphic Design", desc: "Started creative journey mastering visual communication, typography, and UI aesthetics." },
+                { title: "Web Development", desc: "Transitioned into building responsive, interactive websites with HTML, CSS, and JavaScript." },
+                { title: "WordPress/WooCommerce", desc: "Scaled to CMS platforms, delivering full e-commerce solutions and custom themes for clients." },
+                { title: "React/Python/C", desc: "Expanded into advanced frontend frameworks and backend/systems programming for complex applications." },
+                { title: "Future Software Engineering", desc: "Continuously evolving towards architecting scalable, enterprise-grade software systems and AI integrations." }
+            ],
+            packages: [
+                { name: "Starter", price: 49, features: ["Single Page Website", "Responsive Design", "Basic SEO", "1 Revision", "3 Days Delivery"] },
+                { name: "Professional", price: 99, features: ["Multi-Page Website", "Advanced Animations", "CMS Integration", "3 Revisions", "7 Days Delivery", "Priority Support"], featured: true },
+                { name: "Business", price: 199, features: ["Full E-Commerce Setup", "Custom Web Application", "Payment Gateway", "Unlimited Revisions", "14 Days Delivery", "1 Month Maintenance"] }
+            ]
+        };
+
+        /* =========================================
+           2. INITIALIZATION & RENDERING
+           ========================================= */
+        document.addEventListener('DOMContentLoaded', () => {
+            // Loader
+            setTimeout(() => {
+                document.getElementById('loader').style.opacity = '0';
+                document.getElementById('loader').style.visibility = 'hidden';
+            }, 1500);
+
+            // Render Config Data
+            document.getElementById('heroStatus').innerText = CONFIG.personal.status;
+            document.getElementById('heroName').innerHTML = `${CONFIG.personal.name}<br><span>${CONFIG.personal.title}</span>`;
+            
+            renderExpertise();
+            renderFeaturedProjects();
+            renderLabs();
+            renderReactLab();
+            renderPlayground();
+            renderEducation();
+            renderJourney();
+            renderPackages();
+            renderContact();
+            
+            // Init Effects
+            initCursor();
+            initScrollReveal();
+            initTilt();
+            initMagnetic();
+            initParallax();
+            loadPlaygroundState();
+        });
+
+        function renderExpertise() {
+            const cloud = document.getElementById('expertiseCloud');
+            const grid = document.getElementById('expertiseGrid');
+            CONFIG.expertise.forEach((item, i) => {
+                // Cloud
+                const cloudItem = document.createElement('div');
+                cloudItem.className = 'cloud-item';
+                cloudItem.style.color = item.color;
+                cloudItem.innerHTML = `<i class="${item.icon}"></i><span>${item.name}</span>`;
+                cloudItem.style.setProperty('--speed', (i + 1) * 0.5);
+                cloud.appendChild(cloudItem);
+                
+                // Grid
+                const card = document.createElement('div');
+                card.className = 'glass-card tilt-card reveal';
+                card.innerHTML = `<i class="${item.icon}" style="font-size: 2.5rem; color: ${item.color}; margin-bottom: 15px;"></i><h3>${item.name}</h3>`;
+                grid.appendChild(card);
+            });
+        }
+
+        function renderFeaturedProjects() {
+            const grid = document.getElementById('featuredProjectsGrid');
+            CONFIG.featuredProjects.forEach(proj => {
+                const card = document.createElement('div');
+                card.className = 'glass-card project-card tilt-card reveal';
+                card.innerHTML = `
+                    <img src="${proj.img}" alt="${proj.title}" loading="lazy">
+                    <h3>${proj.title}</h3>
+                    <p>${proj.desc}</p>
+                    <div class="tags">${proj.tags.map(t => `<span class="tag">${t}</span>`).join('')}</div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        /* =========================================
+           3. LABS LOGIC (Python/C)
+           ========================================= */
+        let currentPython = 0, currentC = 0;
+
+        function renderLabs() {
+            const pTabs = document.getElementById('pythonTabs');
+            const cTabs = document.getElementById('cTabs');
+            
+            CONFIG.pythonProjects.forEach((p, i) => {
+                const btn = document.createElement('button');
+                btn.className = `lab-tab ${i === 0 ? 'active' : ''}`;
+                btn.innerText = p.title;
+                btn.onclick = () => loadPython(i);
+                pTabs.appendChild(btn);
+            });
+            loadPython(0);
+
+            CONFIG.cProjects.forEach((p, i) => {
+                const btn = document.createElement('button');
+                btn.className = `lab-tab ${i === 0 ? 'active' : ''}`;
+                btn.innerText = p.title;
+                btn.onclick = () => loadC(i);
+                cTabs.appendChild(btn);
+            });
+            loadC(0);
+        }
+
+        function loadPython(index) {
+            currentPython = index;
+            document.querySelectorAll('#pythonTabs .lab-tab').forEach((t, i) => t.classList.toggle('active', i === index));
+            document.getElementById('pythonCode').value = CONFIG.pythonProjects[index].code;
+            document.getElementById('pythonOutput').innerText = 'Ready to execute...';
+        }
+
+        function loadC(index) {
+            currentC = index;
+            document.querySelectorAll('#cTabs .lab-tab').forEach((t, i) => t.classList.toggle('active', i === index));
+            document.getElementById('cCode').value = CONFIG.cProjects[index].code;
+            document.getElementById('cOutput').innerText = 'Ready to compile...';
+        }
+
+        function runSimulation(lang) {
+            const outputEl = document.getElementById(lang === 'python' ? 'pythonOutput' : 'cOutput');
+            const project = lang === 'python' ? CONFIG.pythonProjects[currentPython] : CONFIG.cProjects[currentC];
+            
+            outputEl.innerText = '> Compiling...\n';
+            setTimeout(() => {
+                outputEl.innerText += '> Running...\n';
+                setTimeout(() => {
+                    outputEl.innerText += '> Output:\n' + project.output;
+                }, 800);
+            }, 600);
+        }
+
+        function copyCode(lang) {
+            const code = lang === 'python' ? document.getElementById('pythonCode').value : 
+                        lang === 'c' ? document.getElementById('cCode').value : 
+                        document.getElementById('reactCode').value;
+            navigator.clipboard.writeText(code);
+            alert('Code copied to clipboard!');
+        }
+
+        function switchLabTab(tab) {
+            document.querySelectorAll('#labs .tab-btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+            document.getElementById('pythonLab').classList.toggle('active', tab === 'python');
+            document.getElementById('cLab').classList.toggle('active', tab === 'c');
+        }
+
+        /* =========================================
+           4. REACT LAB LOGIC
+           ========================================= */
+        let currentReact = 0;
+        function renderReactLab() {
+            const tabs = document.getElementById('reactTabs');
+            CONFIG.reactProjects.forEach((p, i) => {
+                const btn = document.createElement('button');
+                btn.className = `lab-tab ${i === 0 ? 'active' : ''}`;
+                btn.innerText = p.title;
+                btn.onclick = () => loadReact(i);
+                tabs.appendChild(btn);
+            });
+            loadReact(0);
+        }
+
+        function loadReact(index) {
+            currentReact = index;
+            document.querySelectorAll('#reactTabs .lab-tab').forEach((t, i) => t.classList.toggle('active', i === index));
+            document.getElementById('reactCode').value = CONFIG.reactProjects[index].code;
+            document.getElementById('reactPreview').innerHTML = CONFIG.reactProjects[index].preview;
+        }
+
+        /* =========================================
+           5. FRONTEND PLAYGROUND LOGIC
+           ========================================= */
+        let currentPG = 0;
+        function renderPlayground() {
+            const tabs = document.getElementById('playgroundTabs');
+            CONFIG.playgroundProjects.forEach((p, i) => {
+                const btn = document.createElement('button');
+                btn.className = `lab-tab ${i === 0 ? 'active' : ''}`;
+                btn.innerText = p.title;
+                btn.onclick = () => loadPlayground(i);
+                tabs.appendChild(btn);
+            });
+            loadPlayground(0);
+            
+            // Auto-run listeners
+            ['pgHtml', 'pgCss', 'pgJs'].forEach(id => {
+                document.getElementById(id).addEventListener('input', () => {
+                    if(document.getElementById('autoRun').checked) {
+                        savePlaygroundState();
+                        runPlayground();
+                    }
+                });
+            });
+        }
+
+        function loadPlayground(index) {
+            currentPG = index;
+            document.querySelectorAll('#playgroundTabs .lab-tab').forEach((t, i) => t.classList.toggle('active', i === index));
+            const p = CONFIG.playgroundProjects[index];
+            document.getElementById('pgHtml').value = p.html;
+            document.getElementById('pgCss').value = p.css;
+            document.getElementById('pgJs').value = p.js;
+            savePlaygroundState();
+            runPlayground();
+        }
+
+        function runPlayground() {
+            const html = document.getElementById('pgHtml').value;
+            const css = document.getElementById('pgCss').value;
+            const js = document.getElementById('pgJs').value;
+            const frame = document.getElementById('playgroundFrame');
+            
+            const srcdoc = `
+                <!DOCTYPE html>
+                <html>
+                <head><style>${css}</style></head>
+                <body>${html}<script>${js}<\/script></body>
+                </html>
+            `;
+            frame.srcdoc = srcdoc;
+        }
+
+        function resetPlayground() {
+            loadPlayground(currentPG);
+        }
+
+        function copyPlayground() {
+            const all = `HTML:\n${document.getElementById('pgHtml').value}\n\nCSS:\n${document.getElementById('pgCss').value}\n\nJS:\n${document.getElementById('pgJs').value}`;
+            navigator.clipboard.writeText(all);
+            alert('All code copied!');
+        }
+
+        function savePlaygroundState() {
+            const state = {
+                html: document.getElementById('pgHtml').value,
+                css: document.getElementById('pgCss').value,
+                js: document.getElementById('pgJs').value,
+                autoRun: document.getElementById('autoRun').checked
+            };
+            localStorage.setItem('moiz_pg_state', JSON.stringify(state));
+        }
+
+        function loadPlaygroundState() {
+            const saved = localStorage.getItem('moiz_pg_state');
+            if(saved) {
+                const state = JSON.parse(saved);
+                document.getElementById('pgHtml').value = state.html;
+                document.getElementById('pgCss').value = state.css;
+                document.getElementById('pgJs').value = state.js;
+                document.getElementById('autoRun').checked = state.autoRun;
+                runPlayground();
+            }
+        }
+
+        /* =========================================
+           6. JOURNEY & EDUCATION
+           ========================================= */
+        function renderEducation() {
+            const grid = document.getElementById('educationGrid');
+            CONFIG.education.forEach(edu => {
+                const card = document.createElement('div');
+                card.className = 'glass-card reveal';
+                card.innerHTML = `<h3>${edu.degree}</h3><p style="color: var(--crimson); margin: 5px 0;">${edu.institution}</p><p style="color: var(--text-secondary); font-size: 0.9rem;">${edu.year}</p>`;
+                grid.appendChild(card);
+            });
+        }
+
+        function renderJourney() {
+            const timeline = document.getElementById('freelanceTimeline');
+            CONFIG.journey.forEach(j => {
+                const item = document.createElement('div');
+                item.className = 'timeline-item reveal';
+                item.innerHTML = `<h4>${j.title}</h4><p>${j.desc}</p>`;
+                timeline.appendChild(item);
+            });
+        }
+
+        function switchJourneyTab(tab) {
+            document.querySelectorAll('#journey .tab-btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+            document.getElementById('educationTab').classList.toggle('active', tab === 'education');
+            document.getElementById('freelanceTab').classList.toggle('active', tab === 'freelance');
+        }
+
+        /* =========================================
+           7. PACKAGES & CART LOGIC
+           ========================================= */
+        function renderPackages() {
+            const grid = document.getElementById('packagesGrid');
+            CONFIG.packages.forEach((pkg, i) => {
+                const card = document.createElement('div');
+                card.className = `glass-card package-card tilt-card reveal ${pkg.featured ? 'featured' : ''}`;
+                card.innerHTML = `
+                    <h3>${pkg.name}</h3>
+                    <div class="price">$${pkg.price}<span>/project</span></div>
+                    <ul class="features">
+                        ${pkg.features.map(f => `<li>${f}</li>`).join('')}
+                    </ul>
+                    <button class="btn btn-primary magnetic" onclick="addToCart(${i})">Add to Cart</button>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function addToCart(index) {
+            const pkg = CONFIG.packages[index];
+            let cart = JSON.parse(localStorage.getItem('moiz_cart') || '[]');
+            cart.push(pkg);
+            localStorage.setItem('moiz_cart', JSON.stringify(cart));
+            updateCartUI();
+            toggleCart();
+        }
+
+        function removeFromCart(index) {
+            let cart = JSON.parse(localStorage.getItem('moiz_cart') || '[]');
+            cart.splice(index, 1);
+            localStorage.setItem('moiz_cart', JSON.stringify(cart));
+            updateCartUI();
+        }
+
+        function updateCartUI() {
+            const cart = JSON.parse(localStorage.getItem('moiz_cart') || '[]');
+            document.getElementById('cartCount').innerText = cart.length;
+            
+            const container = document.getElementById('cartItems');
+            container.innerHTML = '';
+            let total = 0;
+            
+            cart.forEach((item, i) => {
+                total += item.price;
+                const div = document.createElement('div');
+                div.className = 'cart-item';
+                div.innerHTML = `
+                    <div class="cart-item-info">
+                        <h4>${item.name}</h4>
+                        <p>$${item.price}</p>
+                    </div>
+                    <button class="remove-btn" onclick="removeFromCart(${i})"><i class="fa-solid fa-trash"></i></button>
+                `;
+                container.appendChild(div);
+            });
+            
+            document.getElementById('cartTotal').innerText = `$${total}`;
+        }
+
+        function toggleCart() {
+            document.getElementById('cartDrawer').classList.toggle('open');
+            document.querySelector('.cart-overlay').classList.toggle('open');
+        }
+
+        function checkoutWhatsApp() {
+            const cart = JSON.parse(localStorage.getItem('moiz_cart') || '[]');
+            if(cart.length === 0) return alert("Your cart is empty!");
+            
+            let msg = `Hello Moiz Ahmad, I want to order the following packages:%0A`;
+            let total = 0;
+            cart.forEach(item => {
+                msg += `- ${item.name} ($${item.price})%0A`;
+                total += item.price;
+            });
+            msg += `%0ATotal: $${total}%0APlease proceed with the next steps.`;
+            
+            window.open(`https://wa.me/${CONFIG.personal.whatsapp}?text=${msg}`, '_blank');
+        }
+
+        /* =========================================
+           8. CONTACT RENDERING
+           ========================================= */
+        function renderContact() {
+            const grid = document.getElementById('contactGrid');
+            const contacts = [
+                { icon: "fa-brands fa-whatsapp", label: "WhatsApp", value: CONFIG.personal.whatsappDisplay, link: `https://wa.me/${CONFIG.personal.whatsapp}` },
+                { icon: "fa-solid fa-envelope", label: "Email", value: CONFIG.personal.email, link: `mailto:${CONFIG.personal.email}` },
+                { icon: "fa-brands fa-tiktok", label: "TikTok", value: CONFIG.personal.tiktok, link: "https://tiktok.com/@zenflaremoiz" },
+                { icon: "fa-brands fa-instagram", label: "Instagram", value: CONFIG.personal.instagram, link: "https://instagram.com/zenflaremoiz" },
+                { icon: "fa-brands fa-fiverr", label: "Fiverr", value: CONFIG.personal.fiverr, link: "https://fiverr.com/gdmoizahmad" }
+            ];
+            
+            contacts.forEach(c => {
+                const div = document.createElement('div');
+                div.className = 'glass-card contact-item tilt-card reveal';
+                div.innerHTML = `
+                    <i class="${c.icon}"></i>
+                    <h4>${c.label}</h4>
+                    <a href="${c.link}" target="_blank">${c.value}</a>
+                `;
+                grid.appendChild(div);
+            });
+        }
+
+        /* =========================================
+           9. ANIMATIONS & EFFECTS
+           ========================================= */
+        function initCursor() {
+            const dot = document.querySelector('.cursor-dot');
+            const outline = document.querySelector('.cursor-outline');
+            
+            window.addEventListener('mousemove', (e) => {
+                const posX = e.clientX;
+                const posY = e.clientY;
+                
+                dot.style.left = `${posX}px`;
+                dot.style.top = `${posY}px`;
+                
+                outline.animate({
+                    left: `${posX}px`,
+                    top: `${posY}px`
+                }, { duration: 500, fill: "forwards" });
+            });
+
+            document.querySelectorAll('a, button, .tilt-card, input, textarea').forEach(el => {
+                el.addEventListener('mouseenter', () => outline.classList.add('hovered'));
+                el.addEventListener('mouseleave', () => outline.classList.remove('hovered'));
+            });
+        }
+
+        function initScrollReveal() {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+        }
+
+        function initTilt() {
+            document.querySelectorAll('.tilt-card').forEach(card => {
+                card.addEventListener('mousemove', (e) => {
+                    const rect = card.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    const centerX = rect.width / 2;
+                    const centerY = rect.height / 2;
+                    const rotateX = ((y - centerY) / centerY) * -5;
+                    const rotateY = ((x - centerX) / centerX) * 5;
+                    
+                    card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
+                });
+                
+                card.addEventListener('mouseleave', () => {
+                    card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) scale3d(1, 1, 1)';
+                });
+            });
+        }
+
+        function initMagnetic() {
+            document.querySelectorAll('.magnetic').forEach(btn => {
+                btn.addEventListener('mousemove', (e) => {
+                    const rect = btn.getBoundingClientRect();
+                    const x = e.clientX - rect.left - rect.width / 2;
+                    const y = e.clientY - rect.top - rect.height / 2;
+                    btn.style.transform = `translate(${x * 0.2}px, ${y * 0.2}px)`;
+                });
+                btn.addEventListener('mouseleave', () => {
+                    btn.style.transform = 'translate(0, 0)';
+                });
+            });
+        }
+
+        function initParallax() {
+            const hero = document.querySelector('.hero');
+            const cloudItems = document.querySelectorAll('.cloud-item');
+            
+            hero.addEventListener('mousemove', (e) => {
+                const x = (e.clientX / window.innerWidth - 0.5) * 2;
+                const y = (e.clientY / window.innerHeight - 0.5) * 2;
+                
+                cloudItems.forEach((item, i) => {
+                    const speed = (i + 1) * 10;
+                    item.style.transform = `translate(${x * speed}px, ${y * speed}px)`;
+                });
+            });
+        }
+    </script>
+</body>
+</html>
